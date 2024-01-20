@@ -28,6 +28,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
@@ -36,6 +37,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     //    P6Spy formatter
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+    // validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     //    lombok symbol오류시
     testAnnotationProcessor 'org.projectlombok:lombok'
     //Querydsl
@@ -50,6 +53,8 @@ dependencies {
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.1.RELEASE'
     // 썸네일레이터
     implementation 'net.coobird:thumbnailator:0.4.8'
+    // coolsms
+    implementation 'net.nurigo:sdk:4.3.0'
 }
 
 tasks.named('test') {

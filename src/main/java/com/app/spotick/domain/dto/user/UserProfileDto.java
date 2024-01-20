@@ -2,6 +2,8 @@ package com.app.spotick.domain.dto.user;
 
 import com.app.spotick.domain.entity.user.UserAuthority;
 import com.app.spotick.domain.type.user.UserStatus;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,8 +20,9 @@ public class UserProfileDto {
     private String fileName;
     private String uuid;
     private String uploadPath;
+    private boolean isDefaultImage;
 
-    public UserProfileDto(Long id, String email, String nickName, String tel, UserStatus userStatus, LocalDateTime createdDate, String fileName, String uuid, String uploadPath) {
+    public UserProfileDto(Long id, String email, String nickName, String tel, UserStatus userStatus, LocalDateTime createdDate, String fileName, String uuid, String uploadPath, boolean isDefaultImage) {
         this.id = id;
         this.email = email;
         this.nickName = nickName;
@@ -29,5 +32,6 @@ public class UserProfileDto {
         this.fileName = fileName;
         this.uuid = uuid;
         this.uploadPath = uploadPath;
+        this.isDefaultImage = isDefaultImage;
     }
 }

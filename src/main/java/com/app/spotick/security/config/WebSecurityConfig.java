@@ -8,6 +8,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
 @Configuration
 @EnableWebSecurity
@@ -27,6 +29,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests((requests) -> requests
 //                        해당  url로 들어온 요청은 인증을 해야한다
                                 .requestMatchers("/mypage/*").authenticated()
+                                .requestMatchers("/place/register").authenticated()
 //                        해당  url로 들어온 요청은 인증과 권한확인을 해야한다
 //                                .requestMatchers("/admin")
 //                                .hasAnyRole("USER", "ADMIN")
@@ -47,14 +50,18 @@ public class WebSecurityConfig {
 
                 )
 
-                .logout((logout) -> logout
-                                .logoutUrl("/logout")
-                                .logoutSuccessUrl("/")
-                                .invalidateHttpSession(true)
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/")
+                        .invalidateHttpSession(true)
                 )
-                .exceptionHandling(exceptionHandling->
-                        exceptionHandling.accessDeniedPage("/")
-                );
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .accessDeniedPage("/")
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendRedirect("/user/login?gm=true");
+                        })
+                )
+        ;
 
         return http.build();
     }
