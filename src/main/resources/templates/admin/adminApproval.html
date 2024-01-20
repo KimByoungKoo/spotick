@@ -4,7 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>관리자 페이지 - 관리자 승인</title>
+  <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"
+          integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"
+  />
   <link rel="stylesheet" href="../css/adminApproval.css" />
+  <link rel="stylesheet" href="../css/datepicker.css" />
 </head>
 <body>
 <div class="admin-main">
@@ -79,6 +87,8 @@
           <input type="text" placeholder="이름" class="user-search-name" />
           <span>아이디 : </span>
           <input type="text" placeholder="아이디" class="user-search-id" />
+          <span>등록일 : </span>
+          <input name="date" id="datepicker" />
           <span>대여/발매 : </span>
           <select name="mode" id="mode" class="user-search-place-ticket">
             <option value="">선택</option>
@@ -192,5 +202,9 @@
         integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM="
         crossorigin="anonymous"
 ></script>
+<!-- datepicker JavaScript -->
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<script src="../js/datepicker.js"></script>
+<!-- datepicker JavaScript -->
 <script src="../js/adminApproval.js"></script>
 </html>

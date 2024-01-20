@@ -1,10 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>관리자 페이지 - 회원 관리</title>
-  <link rel="stylesheet" th:href="@{/css/admin/adminUser.css}" />
+  <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"
+          integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"
+  />
+  <link rel="stylesheet" href="../css/adminUser.css" />
+  <link rel="stylesheet" href="../css/datepicker.css" />
 </head>
 <body>
 <div class="admin-main">
@@ -75,18 +83,20 @@
       <!-- 회원 정보 검색 및 테이블 -->
       <form action="#" method="#">
         <div class="user-search">
-          <span>이름 : </span>
-          <input type="text" placeholder="이름" class="user-search-name" />
-          <span>아이디 : </span>
-          <input type="text" placeholder="아이디" class="user-search-id" />
-          <span>대여/발매 : </span>
+          <span>이메일 : </span>
+          <input type="text" placeholder="이메일" class="user-search-name" />
+          <span>닉네임 : </span>
+          <input type="text" placeholder="닉네임" class="user-search-name" />
+          <span>가입일 : </span>
+          <input name="date" id="datepicker" />
+          <span>회원등급 : </span>
           <select name="mode" id="mode" class="user-search-place-ticket">
             <option value="">선택</option>
-            <option value="1">대여</option>
-            <option value="2">발매</option>
-          </select>
-          <button type="button" class="search-btn">검색</button>
-          <!-- 장소일 때, 티켓일 때 드롭박스 달리 보이게 설정 -->
+            <option value="1">일반회원</option>
+            <option value="2">호스트</option>
+            <select name="mode" id="mode" class="user-status">
+              <button type="button" class="search-btn">검색</button>
+              <!-- 장소일 때, 티켓일 때 드롭박스 달리 보이게 설정 -->
         </div>
       </form>
 
@@ -97,11 +107,10 @@
             <td class="user-table-checkbox" align="center">
               <input type="checkbox" name="" id="user-table-category-check" />
             </td>
-            <td class="user-name" align="center">이름</td>
-            <td class="user-id" align="center">아이디</td>
-            <td class="user-place-ticket" align="center">대여/발매</td>
-            <td class="user-phonenumber" align="center">핸드폰 번호</td>
             <td class="user-email" align="center">이메일</td>
+            <td class="user-nickname" align="center">닉네임</td>
+            <td class="user-place-ticket" align="center">회원등급</td>
+            <td class="user-phonenumber" align="center">핸드폰 번호</td>
             <!-- <td class="user-address">주소</td>
             <td class="user-address-detail">상세주소</td>
             <td class="user-zipcode">우편번호</td> -->
@@ -117,14 +126,10 @@
             <td class="user-table-checkbox" align="center">
               <input type="checkbox" name="" class="user-check" id="user-checking" />
             </td>
-            <td class="user-name" align="center">김철수</td>
-            <td class="user-id" align="center">aaa</td>
-            <td class="user-palce-tcket" align="center">대여</td>
-            <td class="user-phonenumber" align="center">010-1111-1111</td>
             <td class="user-email" align="center">aaa@gmail.com</td>
-            <!-- <td class="user-address">서울특별시</td>
-            <td class="user-address-detail">강남구</td>
-            <td class="user-zipcode">11111</td> -->
+            <td class="user-nickname" align="center">aaa@gmail.com</td>
+            <td class="user-palce-tcket" align="center">일반회원</td>
+            <td class="user-phonenumber" align="center">010-1111-1111</td>
             <td class="user-register-date" align="center">2023-12-13</td>
             <td class="user-status-select" align="center">
               <select class="user-status-choice" name="status-choice">
@@ -149,14 +154,10 @@
             <td class="user-table-checkbox" align="center">
               <input type="checkbox" name="" class="user-check" id="user-checking" />
             </td>
-            <td class="user-name" align="center">홍길동</td>
-            <td class="user-id" align="center">bbb</td>
-            <td class="user-palce-tcket" align="center">대여</td>
-            <td class="user-phonenumber" align="center">010-2222-2222</td>
             <td class="user-email" align="center">bbb@gmail.com</td>
-            <!-- <td class="user-address">경기도</td>
-            <td class="user-address-detail">수원시</td>
-            <td class="user-zipcode">11222</td> -->
+            <td class="user-nickname" align="center">aaa@gmail.com</td>
+            <td class="user-palce-tcket" align="center">일반회원</td>
+            <td class="user-phonenumber" align="center">010-2222-2222</td>
             <td class="user-register-date" align="center">2023-12-02</td>
             <td class="user-status-select" align="center">
               <select class="user-status-choice" name="status-choice">
@@ -181,14 +182,10 @@
             <td class="user-table-checkbox" align="center">
               <input type="checkbox" name="" class="user-check" id="user-checking" />
             </td>
-            <td class="user-name" align="center">이유리</td>
-            <td class="user-id" align="center">ccc</td>
-            <td class="user-palce-tcket" align="center">발매</td>
-            <td class="user-phonenumber" align="center">010-3333-3333</td>
             <td class="user-email" align="center">ccc@gmail.com</td>
-            <!-- <td class="user-address">경기도</td>
-            <td class="user-address-detail">오산시</td>
-            <td class="user-zipcode">12345</td> -->
+            <td class="user-nickname" align="center">aaa@gmail.com</td>
+            <td class="user-palce-tcket" align="center">호스트</td>
+            <td class="user-phonenumber" align="center">010-3333-3333</td>
             <td class="user-register-date" align="center">2023-11-21</td>
             <td class="user-status-select" align="center">
               <select class="user-status-choice" name="status-choice">
@@ -226,5 +223,9 @@
         integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM="
         crossorigin="anonymous"
 ></script>
+<!-- datepicker JavaScript -->
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<script src="../js/datepicker.js"></script>
+<!-- datepicker JavaScript -->
 <script src="../js/adminUser.js"></script>
 </html>

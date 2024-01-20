@@ -3,8 +3,16 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>관리자 페이지 - 관리자 승인</title>
-    <link rel="stylesheet" href="../css/adminApproval.css" />
+    <title>관리자 페이지 - 결제관리</title>
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"
+            integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="../css/adminPayment.css" />
+    <link rel="stylesheet" href="../css/datepicker.css" />
 </head>
 <body>
 <div class="admin-main">
@@ -61,11 +69,11 @@
             <!-- 관리자 카테고리 -->
             <div class="category">
                 <div class="admin-big-category">
-                    <h2>승인 관리</h2>
+                    <h2>결제 관리</h2>
 
                     <div class="admin-small-category">
                         <a href="#" class="admin-small-category-url categoty-url">
-                            <h4>관리자 승인</h4>
+                            <h4>결제 정보</h4>
                         </a>
                     </div>
                 </div>
@@ -79,6 +87,8 @@
                     <input type="text" placeholder="이름" class="user-search-name" />
                     <span>아이디 : </span>
                     <input type="text" placeholder="아이디" class="user-search-id" />
+                    <span>구매일 : </span>
+                    <input name="date" id="datepicker" />
                     <span>대여/발매 : </span>
                     <select name="mode" id="mode" class="user-search-place-ticket">
                         <option value="">선택</option>
@@ -86,92 +96,99 @@
                         <option value="2">발매</option>
                     </select>
                     <button type="button" class="search-btn">검색</button>
+                    <!-- 장소일 때, 티켓일 때 드롭박스 달리 보이게 설정 -->
                 </div>
             </form>
 
             <div class="table-box">
-                <table class="approval-search-table">
+                <table class="payment-search-table">
                     <thead>
-                    <tr class="approval-table-categoty">
-                        <td class="approval-table-checkbox" align="center">
-                            <input type="checkbox" name="" id="approval-category-check" />
+                    <tr class="payment-table-categoty">
+                        <td class="payment-table-checkbox" align="center">
+                            <input type="checkbox" name="" id="pay-management-category-check" />
                         </td>
                         <td class="user-name" align="center">호스트</td>
                         <td class="user-id" align="center">아이디</td>
                         <td class="user-place-ticket" align="center">대여/발매</td>
-                        <td class="approval-register-date" align="center">등록일</td>
-                        <td class="approval-status" align="center">승인상태 관리</td>
-                        <td class="approval-now-status" align="center">승인상태</td>
+                        <td class="product-buyer" align="center">구매자</td>
+                        <td class="product-purchase-date" align="center">구매일자</td>
+                        <!-- 관리자가 구매취소 및 판매취소 할껀지에따라 추가 로직 구현 -->
+                        <td class="product-status" align="center">구매상태 관리</td>
+                        <td class="product-now-status" align="center">구매상태</td>
+                        <!-- 관리자가 구매취소 및 판매취소 할껀지에따라 추가 로직 구현 -->
                     </tr>
                     </thead>
 
                     <tbody>
                     <!-- 회원 1 -->
-                    <tr class="approval-table-category">
-                        <td class="approval-table-checkbox" align="center">
-                            <input type="checkbox" name="" class="approval-check" id="approval-checking" />
+                    <tr class="payment-table-category">
+                        <td class="payment-checkbox" align="center">
+                            <input type="checkbox" name="" class="payment-check" id="payment-checking" />
                         </td>
                         <td class="user-name" align="center">김철수</td>
                         <td class="user-id" align="center">aaa</td>
                         <td class="user-place-ticket" align="center">대여</td>
-                        <td class="approval-register-date" align="center">2023-12-10</td>
-                        <td class="approval-status-select" align="center">
-                            <select class="approval-status-choice" name="approval-choice">
+                        <td class="product-buyer" align="center">이유리</td>
+                        <td class="product-purchase-date" align="center">2023-12-23</td>
+                        <td class="product-status-select" align="center">
+                            <select class="product-status-choice" name="product-choice">
                                 <option value="">선택</option>
-                                <option value="1">승인완료</option>
-                                <option value="2">승인거절</option>
+                                <option value="1">구매완료</option>
+                                <option value="2">구매취소</option>
                             </select>
                         </td>
-                        <td class="approval-status-management" align="center">
-                            <div class="approval-status-box Y">승인완료</div>
-                            <!-- <div class="approval-status-box B">승인거절</div> -->
+                        <td class="payment-status-management" align="center">
+                            <div class="payment-status-box Y">구매완료</div>
+                            <!-- <div class="payment-status-box B">구매취소</div> -->
                         </td>
                     </tr>
 
                     <!-- 회원 1 -->
 
                     <!-- 회원 2 -->
-                    <tr class="approval-table-category">
-                        <td class="approval-table-checkbox" align="center">
-                            <input type="checkbox" name="" class="approval-check" id="approval-checking" />
+                    <tr class="payment-table-category">
+                        <td class="payment-checkbox" align="center">
+                            <input type="checkbox" name="" class="payment-check" id="payment-checking" />
                         </td>
                         <td class="user-name" align="center">김철수</td>
                         <td class="user-id" align="center">aaa</td>
                         <td class="user-place-ticket" align="center">발매</td>
-                        <td class="approval-register-date" align="center">2023-12-11</td>
-                        <td class="approval-status-select" align="center">
-                            <select class="approval-status-choice" name="approval-choice">
+                        <td class="product-buyer" align="center">이유리</td>
+                        <td class="product-purchase-date" align="center">2023-12-23</td>
+                        <td class="product-status-select" align="center">
+                            <select class="product-status-choice" name="product-choice">
                                 <option value="">선택</option>
-                                <option value="1">승인완료</option>
-                                <option value="2">승인거절</option>
+                                <option value="1">구매완료</option>
+                                <option value="2">구매취소</option>
                             </select>
                         </td>
-                        <td class="approval-status-management" align="center">
-                            <!-- <div class="approval-status-box Y">승인완료</div> -->
-                            <div class="approval-status-box B">승인거절</div>
+                        <td class="payment-status-management" align="center">
+                            <div class="payment-status-box Y">구매완료</div>
+                            <!-- <div class="payment-status-box B">구매취소</div> -->
                         </td>
                     </tr>
                     <!-- 회원 2 -->
 
                     <!-- 회원 3 -->
-                    <tr class="approval-table-category">
-                        <td class="approval-table-checkbox" align="center">
-                            <input type="checkbox" name="" class="approval-check" id="approval-checking" />
+                    <tr class="payment-table-category">
+                        <td class="payment-checkbox" align="center">
+                            <input type="checkbox" name="" class="payment-check" id="payment-checking" />
                         </td>
                         <td class="user-name" align="center">김철수</td>
                         <td class="user-id" align="center">aaa</td>
                         <td class="user-place-ticket" align="center">발매</td>
-                        <td class="approval-register-date" align="center">2023-12-12</td>
-                        <td class="approval-status-select" align="center">
-                            <select class="approval-status-choice" name="approval-choice">
+                        <td class="product-buyer" align="center">이유리</td>
+                        <td class="product-purchase-date" align="center">2023-12-23</td>
+                        <td class="product-status-select" align="center">
+                            <select class="product-status-choice" name="product-choice">
                                 <option value="">선택</option>
-                                <option value="1">승인완료</option>
-                                <option value="2">승인거절</option>
+                                <option value="1">구매완료</option>
+                                <option value="2">구매취소</option>
                             </select>
                         </td>
-                        <td class="approval-status-management" align="center">
-                            <div class="approval-status-box Y">승인완료</div>
-                            <!-- <div class="approval-status-box B">승인거절</div> -->
+                        <td class="payment-status-management" align="center">
+                            <!-- <div class="payment-status-box Y">구매완료</div> -->
+                            <div class="payment-status-box B">구매취소</div>
                         </td>
                     </tr>
 
@@ -181,9 +198,11 @@
             </div>
             <!-- 회원 정보 검색 및 테이블 -->
         </div>
-        <div class="approval-status-btn">
-            <button type="button" class="approval-management-btn">변경</button>
+        <div class="payment-status-btn">
+            <button type="button" class="payment-management-btn">변경</button>
         </div>
+
+        <!--  -->
     </div>
 </div>
 </body>
@@ -192,5 +211,9 @@
         integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM="
         crossorigin="anonymous"
 ></script>
-<script src="../js/adminApproval.js"></script>
+<!-- datepicker JavaScript -->
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<script src="../js/datepicker.js"></script>
+<!-- datepicker JavaScript -->
+<script src="../js/adminPayment.js"></script>
 </html>
