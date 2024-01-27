@@ -3,8 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>관리자 페이지 - 댓글 관리</title>
+  <title>관리자 페이지 - 게시판 관리</title>
+  <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"
+          integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"
+  />
   <link rel="stylesheet" href="../css/adminReply.css" />
+  <link rel="stylesheet" href="../css/datepicker.css" />
 </head>
 <body>
 <div class="admin-main">
@@ -61,15 +69,20 @@
       <!-- 관리자 카테고리 -->
       <div class="category">
         <div class="admin-big-category">
-          <h2>댓글 관리</h2>
+          <h2>게시글 관리</h2>
 
           <div class="admin-small-category-container">
             <div class="admin-small-category1">
               <a href="#" class="admin-small-category-url categoty-url">
-                <h4>게시글 관리</h4>
+                <h4>장소글 관리</h4>
               </a>
             </div>
             <div class="admin-small-category2">
+              <a href="#" class="admin-small-category-url categoty-url">
+                <h4>티켓글 관리</h4>
+              </a>
+            </div>
+            <div class="admin-small-category3">
               <a href="#" class="admin-small-category-url categoty-url">
                 <h4>댓글 관리</h4>
               </a>
@@ -90,8 +103,7 @@
             <option value="2">발매</option>
           </select>
           <span>작성일 : </span>
-          <!-- 작성일 달력 들어갈 예정 -->
-          <!--  -->
+          <input name="date" id="datepicker" />
           <span>공개/비공개 : </span>
           <select name="public-secret" id="public-secret" class="select-public-secret">
             <option value="1">공개</option>
@@ -102,86 +114,86 @@
       </form>
 
       <div class="table-box">
-        <table class="reply-search-table">
+        <table class="board-search-table">
           <thead>
           <tr class="reply-table-category">
-            <td class="reply-table-checkbox" align="center">
-              <input type="checkbox" name="" id="reply-table-category-check" />
+            <td class="board-table-checkbox" align="center">
+              <input type="checkbox" name="" id="board-table-category-check" />
             </td>
-            <td class="reply-writer" align="center">작성자</td>
-            <td class="reply-category" align="center">게시판</td>
-            <td class="reply-title" align="center">댓글</td>
-            <td class="reply-write-date" align="center">작성일</td>
-            <td class="reply-public-secret" align="center">공개/비공개</td>
-            <td class="reply-status" align="center">상태</td>
+            <td class="board-writer" align="center">작성자</td>
+            <td class="board-category" align="center">게시판</td>
+            <td class="board-title" align="center">글 제목</td>
+            <td class="board-write-date" align="center">작성일</td>
+            <td class="board-public-secret" align="center">공개/비공개</td>
+            <td class="board-status" align="center">상태</td>
           </tr>
           </thead>
 
           <tbody>
-          <tr class="reply-table-category">
-            <td class="reply-checkbox" id="reply-checking" align="center">
-              <input type="checkbox" name="" class="reply-check" id="reply-checking" />
+          <tr class="board-table-category">
+            <td class="board-checkbox" align="center">
+              <input type="checkbox" name="" class="board-check" id="board-checking" />
             </td>
-            <td class="reply-writer" align="center">김철수</td>
-            <td class="reply-category" align="center">대여</td>
-            <td class="reply-title" align="center">풋살장 이용해봤는데 너무 좋았습니다!</td>
-            <td class="reply-write-date" align="center">2023-12-13</td>
-            <td class="reply-public-secret" align="center">
-              <select class="select-public-secret" align="center">
+            <td class="board-writer" align="center">김철수</td>
+            <td class="board-category" align="center">대여</td>
+            <td class="board-title" align="center">풋살장 빌려드립니다!</td>
+            <td class="board-write-date" align="center">2023-12-13</td>
+            <td class="board-public-secret" align="center">
+              <select name="board-status" class="board-status-choice" align="center">
                 <option value="">선택</option>
                 <option value="1">공개</option>
                 <option value="2">비공개</option>
               </select>
             </td>
-            <td class="reply-status" align="center">
-              <div class="reply-status-box Y">공개</div>
+            <td class="board-status" align="center">
+              <div class="board-status-box Y">공개</div>
             </td>
           </tr>
 
-          <tr class="reply-table-category">
-            <td class="reply-checkbox" id="reply-checking" align="center">
-              <input type="checkbox" name="" class="reply-check" id="reply-checking" />
+          <tr class="board-table-category">
+            <td class="board-checkbox" align="center">
+              <input type="checkbox" name="" class="board-check" id="board-checking" />
             </td>
-            <td class="reply-writer" align="center">김철수</td>
-            <td class="reply-category" align="center">대여</td>
-            <td class="reply-title" align="center">풋살장 이용해봤는데 너무 좋았습니다!</td>
-            <td class="reply-write-date" align="center">2023-12-13</td>
-            <td class="reply-public-secret" align="center">
-              <select class="select-public-secret" align="center">
+            <td class="board-writer" align="center">김철수</td>
+            <td class="board-category" align="center">대여</td>
+            <td class="board-title" align="center">풋살장 빌려드립니다!</td>
+            <td class="board-write-date" align="center">2023-12-13</td>
+            <td class="board-public-secret" align="center">
+              <select name="board-status" class="board-status-choice" align="center">
                 <option value="">선택</option>
                 <option value="1">공개</option>
                 <option value="2">비공개</option>
               </select>
             </td>
-            <td class="reply-status" align="center">
-              <div class="reply-status-box Y">공개</div>
+            <td class="board-status" align="center">
+              <div class="board-status-box Y">공개</div>
             </td>
           </tr>
 
-          <tr class="reply-table-category">
-            <td class="reply-checkbox" id="reply-checking" align="center">
-              <input type="checkbox" name="" class="reply-check" id="reply-checking" />
+          <tr class="board-table-category">
+            <td class="board-checkbox" align="center">
+              <input type="checkbox" name="" class="board-check" id="board-checking" />
             </td>
-            <td class="reply-writer" align="center">김철수</td>
-            <td class="reply-category" align="center">대여</td>
-            <td class="reply-title" align="center">풋살장 이용해봤는데 너무 좋았습니다!</td>
-            <td class="reply-write-date" align="center">2023-12-13</td>
-            <td class="reply-public-secret" align="center">
-              <select class="select-public-secret" align="center">
+            <td class="board-writer" align="center">김철수</td>
+            <td class="board-category" align="center">대여</td>
+            <td class="board-title" align="center">풋살장 빌려드립니다!</td>
+            <td class="board-write-date" align="center">2023-12-13</td>
+            <td class="board-public-secret" align="center">
+              <select name="board-status" class="board-status-choice" align="center">
                 <option value="">선택</option>
                 <option value="1">공개</option>
                 <option value="2">비공개</option>
               </select>
             </td>
-            <td class="reply-status" align="center">
-              <div class="reply-status-box B">비공개</div>
+            <td class="board-status" align="center">
+              <div class="board-status-box B">비공개</div>
             </td>
           </tr>
           </tbody>
         </table>
       </div>
     </div>
-    <div class="reply-status-btn">
+    <div class="board-status-btn">
       <button type="button" class="board-management-btn">변경</button>
     </div>
     <!-- 관리자 카테고리 및 회원 정보 검색 및 테이블 -->
@@ -193,5 +205,9 @@
         integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM="
         crossorigin="anonymous"
 ></script>
-<script src="../js/adminReply.js"></script>
+<!-- datepicker JavaScript -->
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<script src="../js/datepicker.js"></script>
+<!-- datepicker JavaScript -->
+<script src="../js/adminBoard.js"></script>
 </html>

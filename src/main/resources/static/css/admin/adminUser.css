@@ -209,23 +209,10 @@
     font-size: 13px;
 }
 
-.user-search-id {
-    width: 95px;
-    height: 25px;
-    padding: 0px 5px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-}
-
-.user-search-id::placeholder {
-    font-weight: 400;
-    font-size: 13px;
-}
-
 #mode,
 #mode-option {
     width: 120px;
-    height: 25px;
+    height: 28px;
     padding: 0px 5px;
     border-radius: 5px;
     border: 1px solid #ddd;
@@ -316,3 +303,8 @@ td {
     background: #fff;
 }
 /* 테이블 스크롤 바 */
+
+/* datepicker input */
+#datepicker {
+    width: 100px;
+}
