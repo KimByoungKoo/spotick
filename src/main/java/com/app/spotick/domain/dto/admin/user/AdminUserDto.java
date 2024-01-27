@@ -1,4 +1,4 @@
-package com.app.spotick.domain.dto.admin;
+package com.app.spotick.domain.dto.admin.user;
 
 import com.app.spotick.domain.type.user.AuthorityType;
 import com.app.spotick.domain.type.user.UserStatus;
