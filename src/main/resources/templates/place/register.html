@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>장소 등록</title>
+    <link th:href="@{/imgs/logo/favicon.png}" rel="icon">
     <link rel="stylesheet" th:href="@{/css/global-css/root.css}">
     <link rel="stylesheet" th:href="@{/css/place/register.css}"/>
 </head>
@@ -21,7 +22,7 @@
             <div class="input-wrap">
                 <div class="input-guide flex">
                     <p class="input-title">장소 이름</p>
-                    <img src="//s3.hourplace.co.kr/web/images/icon/invalid.svg" alt="필수입력">
+                    <img src="/imgs/invalid.svg" alt="필수입력">
                     <p class="invalid-msg" th:if="${#fields.hasErrors()}" th:errors="*{placeName}"></p>
                 </div>
                 <div class="input-box">
@@ -32,7 +33,7 @@
             <div class="input-wrap">
                 <div class="input-guide flex">
                     <p class="input-title">장소 소제목</p>
-                    <img src="//s3.hourplace.co.kr/web/images/icon/invalid.svg" alt="필수입력">
+                    <img src="/imgs/invalid.svg" alt="필수입력">
                     <p class="invalid-msg" th:if="${#fields.hasErrors()}" th:errors="*{placeSubTitle}"></p>
                 </div>
                 <div class="input-box">
@@ -67,7 +68,7 @@
             <div class="input-wrap">
                 <div class="input-guide flex">
                     <p class="input-title">장소 주소</p>
-                    <img src="//s3.hourplace.co.kr/web/images/icon/invalid.svg" alt="필수입력">
+                    <img src="/imgs/invalid.svg" alt="필수입력">
                     <p class="invalid-msg" th:if="${#fields.hasErrors()}" th:errors="*{placeAddressDetail}"></p>
                 </div>
                 <div class="input-box">
@@ -106,7 +107,7 @@
             <div class="input-wrap">
                 <div class="input-guide flex">
                     <p class="input-title">장소 설명</p>
-                    <img src="//s3.hourplace.co.kr/web/images/icon/invalid.svg" alt="필수입력">
+                    <img src="/imgs/invalid.svg" alt="필수입력">
                     <p class="invalid-msg" th:if="${#fields.hasErrors()}" th:errors="*{placeInfo}"></p>
                 </div>
                 <label for="placeInfo" class="input-box textarea-box">
@@ -118,7 +119,7 @@
             <div class="input-wrap">
                 <div class="input-guide flex">
                     <p class="input-title">장소 이용규칙</p>
-                    <img src="//s3.hourplace.co.kr/web/images/icon/invalid.svg" alt="필수입력">
+                    <img src="/imgs/invalid.svg" alt="필수입력">
                     <p class="invalid-msg" th:if="${#fields.hasErrors()}" th:errors="*{placeRule}"></p>
                 </div>
                 <label for="placeRule" class="input-box textarea-box">
@@ -142,7 +143,7 @@
                 <div class="input-wrap hour-price-wrap">
                     <div class="input-guide flex">
                         <p class="input-title price-title">시간당 대여 금액</p>
-                        <img src="//s3.hourplace.co.kr/web/images/icon/invalid.svg" alt="필수입력">
+                        <img src="/imgs/invalid.svg" alt="필수입력">
                         <p class="invalid-msg" th:if="${#fields.hasErrors()}" th:errors="*{placeDefaultPrice}"></p>
                     </div>
                     <div class="input-box">
@@ -155,7 +156,7 @@
                 <div class="input-wrap hour-price-wrap">
                     <div class="input-guide flex">
                         <p class="input-title">할증금액</p>
-                        <img src="//s3.hourplace.co.kr/web/images/icon/invalid.svg" alt="필수입력">
+                        <img src="/imgs/invalid.svg" alt="필수입력">
                         <p class="guide-msg">기본 인원을 초과하면 해당 금액만큼 할증이 붙어요</p>
                         <p class="invalid-msg" th:if="${#fields.hasErrors()}" th:errors="*{placeSurcharge}"></p>
                     </div>
@@ -170,7 +171,7 @@
             <div class="input-wrap default-people-container">
                 <div class="input-guide flex">
                     <p class="input-title">기본 인원</p>
-                    <img src="//s3.hourplace.co.kr/web/images/icon/invalid.svg" alt="필수입력">
+                    <img src="/imgs/invalid.svg" alt="필수입력">
                     <p class="invalid-msg" th:if="${#fields.hasErrors()}" th:errors="*{placeDefaultPeople}"></p>
                 </div>
                 <div class="input-box">
@@ -188,7 +189,7 @@
                 <div class="input-wrap">
                     <div class="input-guide flex">
                         <p class="input-title">예금주</p>
-                        <img src="//s3.hourplace.co.kr/web/images/icon/invalid.svg" alt="필수입력">
+                        <img src="/imgs/invalid.svg" alt="필수입력">
                         <p class="invalid-msg" th:if="${#fields.hasErrors()}" th:errors="*{accountHolder}"></p>
                     </div>
                     <div class="input-box">
@@ -200,7 +201,7 @@
                 <div class="input-wrap">
                     <div class="input-guide flex">
                         <p class="input-title">은행명</p>
-                        <img src="//s3.hourplace.co.kr/web/images/icon/invalid.svg" alt="필수입력">
+                        <img src="/imgs/invalid.svg" alt="필수입력">
                         <p class="invalid-msg"></p>
                     </div>
                     <div class="input-box select-box">
@@ -216,7 +217,7 @@
             <div class="input-wrap">
                 <div class="input-guide flex">
                     <p class="input-title">계좌번호</p>
-                    <img src="//s3.hourplace.co.kr/web/images/icon/invalid.svg" alt="필수입력">
+                    <img src="/imgs/invalid.svg" alt="필수입력">
                     <p class="invalid-msg" th:if="${#fields.hasErrors()}" th:errors="*{accountNumber}"></p>
                 </div>
                 <div class="input-box">
@@ -239,7 +240,7 @@
 <script src="https://code.jquery.com/jquery-3.6.4.js"></script>
 <script type="text/javascript"
         src="//dapi.kakao.com/v2/maps/sdk.js?appkey=3dc12d7c2624483dc7c019a0a91b727f&libraries=services"></script>
-<script th:src="@{/js/global-js/global.js}"></script>
+<script th:src="@{/js/global-js/global.js}" type="module"></script>
 <script th:src="@{/js/global-js/loading.js}"></script>
 <script th:src="@{/js/place/register/register.js}"></script>
 <script th:src="@{/js/place/register/kakaoMapApi.js}"></script>

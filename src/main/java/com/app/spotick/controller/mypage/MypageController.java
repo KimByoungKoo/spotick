@@ -1,12 +1,21 @@
 package com.app.spotick.controller.mypage;
 
+import com.app.spotick.domain.dto.page.TicketPage;
 import com.app.spotick.domain.dto.place.PlaceListDto;
+import com.app.spotick.domain.dto.place.PlaceManageListDto;
 import com.app.spotick.domain.dto.place.PlaceReservationListDto;
+import com.app.spotick.domain.dto.place.reservation.PlaceReservedNotReviewedDto;
+import com.app.spotick.domain.dto.place.review.ContractedPlaceDto;
+import com.app.spotick.domain.dto.place.review.PlaceReviewRegisterDto;
+import com.app.spotick.domain.dto.place.review.MypageReviewListDto;
+import com.app.spotick.domain.dto.ticket.TicketInfoDto;
+import com.app.spotick.domain.dto.ticket.TicketManageListDto;
 import com.app.spotick.domain.dto.user.UserDetailsDto;
 import com.app.spotick.domain.dto.user.UserProfileDto;
 import com.app.spotick.domain.entity.place.PlaceReservation;
 import com.app.spotick.domain.pagination.Pagination;
 import com.app.spotick.domain.type.place.PlaceReservationStatus;
+import com.app.spotick.domain.type.ticket.TicketRequestType;
 import com.app.spotick.service.place.reservation.PlaceReservationService;
 import com.app.spotick.service.redis.RedisService;
 import com.app.spotick.service.user.UserProfileFileService;
@@ -26,10 +35,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 @Controller
@@ -41,7 +50,6 @@ public class MypageController {
     private final PlaceReservationService placeReservationService;
     private final RedisService redisService;
 
-
     /* ================================================유저정보수정=================================================== */
     @GetMapping("/user-info")
     public void goToUserInfo(Model model, @AuthenticationPrincipal UserDetailsDto userDetailsDto) {
@@ -50,7 +58,7 @@ public class MypageController {
         model.addAttribute("maskedEmail", maskedEmail);
         // 유저 프로필 정보
         UserProfileDto userProfileDto = userService.getUserProfile(userDetailsDto.getId());
-        System.out.println("userProfileDto = " + userProfileDto);
+
         model.addAttribute("userProfile", userProfileDto);
     }
 
@@ -78,22 +86,22 @@ public class MypageController {
         return new RedirectView("/mypage/user-info");
     }
 
-    @PostMapping("/updateNickName")
-    public RedirectView updateNickName(@RequestParam("nickName") String nickName,
-                                       @AuthenticationPrincipal UserDetailsDto userDetailsDto,
-                                       RedirectAttributes redirectAttributes) {
+    @PatchMapping("/updateNickName")
+    @ResponseBody
+    public ResponseEntity<String> updateNickName(@RequestParam("nickname") String nickname,
+                                                 @AuthenticationPrincipal UserDetailsDto userDetailsDto,
+                                                 RedirectAttributes redirectAttributes) {
 
         // 검증
-        if (nickName == null || nickName.length() < 2 || nickName.length() > 10) {
-            redirectAttributes.addFlashAttribute("errorName", "닉네임은 최소 2자에서 최대 10자까지 가능합니다.");
-            return new RedirectView("/mypage/user-info");
+        if (nickname == null || nickname.length() < 2 || nickname.length() > 10) {
+            return ResponseEntity.badRequest().body("닉네임은 최소 2자에서 최대 10자까지 가능합니다.");
         }
 
-        userDetailsDto.updateNickName(nickName);
-        userService.updateNickName(userDetailsDto.getId(), nickName);
+        userDetailsDto.updateNickName(nickname);
+        userService.updateNickName(userDetailsDto.getId(), nickname);
 
         redirectAttributes.addFlashAttribute("successName", "닉네임이 수정되었습니다.");
-        return new RedirectView("/mypage/user-info");
+        return ResponseEntity.ok().body("닉네임이 수정되었습니다.");
     }
 
     @PostMapping("/authenticateTelStart")
@@ -111,25 +119,22 @@ public class MypageController {
 
     @PostMapping("/authenticateTel")
     @ResponseBody
-    public ResponseEntity<Void> authenticateTel(@RequestParam("tel") String tel,
-                                                @RequestParam("code") String code,
-                                                @AuthenticationPrincipal UserDetailsDto userDetailsDto,
-                                                RedirectAttributes redirectAttributes) {
-//        todo : 결과값을 화면으로 반환할 수 있도록 강구하여야 함.
+    public ResponseEntity<String> authenticateTel(@RequestParam("tel") String tel,
+                                                  @RequestParam("code") String code,
+                                                  @AuthenticationPrincipal UserDetailsDto userDetailsDto) {
 
         // 검증
         if (Objects.equals(redisService.getValues(tel), code)) {
             System.out.println("인증 성공");
-
+            
             userService.updateTel(userDetailsDto.getId(), tel);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Location", "/mypage/user-info");
+            redisService.deleteValues(tel);
 
-            return new ResponseEntity<>(headers, HttpStatus.OK);
+            return ResponseEntity.ok().body("전화번호가 수정되었습니다");
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        return ResponseEntity.badRequest().body("잘못된 코드입니다.");
     }
 
     @PostMapping("/changePassword")
@@ -177,127 +182,122 @@ public class MypageController {
         model.addAttribute("reservationDtoList", reservations);
         model.addAttribute("pagination", pagination);
     }
-
-    @GetMapping("/reservation/{reservationId}/cancel")
-    @ResponseBody
-    public ResponseEntity<String> cancelReservation(@PathVariable("reservationId") Long reservationId,
-                                                    @AuthenticationPrincipal UserDetailsDto userDetailsDto) {
-        if (reservationId == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("잘못된 요청입니다.");
-        }
-
-        // reservationId검증: userId 동일한지 검증 필요 -> 시간정보 찾아와서 checkIn시간 체크하여 지나지 않았는지 검증 -> accepted 검증(아닐 시 취소 불가능)
-        PlaceReservation reservation = placeReservationService
-                .findReservationByIdAndUser(reservationId, userDetailsDto.getId()).orElse(null);
-
-        if (reservation == null) {
-            // 예약 정보를 찾을 수 없을 시
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("예약 정보를 찾을 수 없습니다.");
-
-        }
-
-        if (!Objects.equals(reservation.getUser().getId(), userDetailsDto.getId())) {
-            // 조회를 하여도 user의 정보가 해당 로그인 유저와 다를 시
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("예약 정보에 접근할 권한이 없습니다.");
-
-        }
-
-        if (reservation.getCheckIn().isBefore(LocalDateTime.now())) {
-            // checkIn시간이 현재 시간보다 이전일 경우, 이미 승인된 예약일 경우
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("예약 시간이 지나간 예약은<br>취소할 수 없습니다.");
-
-        }
-
-        if (reservation.getReservationStatus().equals(PlaceReservationStatus.APPROVED)) {
-            // 승인된 예약은 취소 불가
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("이미 승인된 예약은<br>취소할 수 없습니다.");
-        }
-
-        placeReservationService.cancelReservation(reservationId);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body("예약이 취소되었습니다.");
-    }
-
-    @GetMapping("/reservation/{reservationId}/delete")
-    @ResponseBody
-    public ResponseEntity<String> deleteReservation(@PathVariable("reservationId") Long reservationId,
-                                                    @AuthenticationPrincipal UserDetailsDto userDetailsDto,
-                                                    RedirectAttributes redirectAttributes) {
-        if (reservationId == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("잘못된 요청입니다.");
-        }
-
-        // reservationId검증: userId 동일한지 검증 필요 -> 시간정보 찾아와서 checkOut시간 체크하여 지나갔는지 검증 -> accepted, rejected, cancled아닐 시 삭제 불가.
-        PlaceReservation reservation = placeReservationService
-                .findReservationByIdAndUser(reservationId, userDetailsDto.getId()).orElse(null);
-
-        if (reservation == null) {
-            // 예약 정보를 찾을 수 없을 시
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("예약 정보를 찾을 수 없습니다.");
-
-        }
-
-        if (!Objects.equals(reservation.getUser().getId(), userDetailsDto.getId())) {
-            // 조회를 하여도 user의 정보가 해당 로그인 유저와 다를 시
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("예약 정보에 접근할 권한이 없습니다.");
-
-        }
-
-        if (reservation.getCheckOut().isAfter(LocalDateTime.now())) {
-            // checkIn시간이 현재 시간보다 이전일 경우, 이미 승인된 예약일 경우
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("예약시간이 지나지 않은 예약은<br>삭제할 수 없습니다.");
-
-        }
-
-        if (reservation.getReservationStatus().equals(PlaceReservationStatus.PENDING)
-                || reservation.getReservationStatus().equals(PlaceReservationStatus.WAITING_PAYMENT)) {
-            // 예약이 해지되지 못하고 유효한 상태일 시 삭제불가
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("예약이 해지되어있지 않습니다.<br>예약을 취소하고 삭제를 시도하여주십시오.");
-        }
-
-        placeReservationService.deleteReservation(reservationId);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body("예약내역이 삭제되었습니다.");
-    }
-
     @GetMapping("/inquiries")
     public void goToInquiries() {
     }
 
     @GetMapping("/reviews")
-    public void goToReviews() {
+    public RedirectView goToReviews() {
+        return new RedirectView("/mypage/reviews/reviewable");
     }
 
-    @GetMapping("/tickets")
-    public void goToTickets() {
+    @GetMapping("/reviews/reviewable")
+    public void goToReviewsReviewable(@ModelAttribute("reviewRegisterDto") PlaceReviewRegisterDto placeReviewRegisterDto,
+                                      @RequestParam(value = "page", defaultValue = "1") int page,
+                                      @AuthenticationPrincipal UserDetailsDto userDetailsDto,
+                                      Model model) {
+
+        Pageable pageable = PageRequest.of(page - 1, 6);
+
+        Page<PlaceReservedNotReviewedDto> notReviewedList
+                = userService.findPlacesNotReviewed(userDetailsDto.getId(), pageable);
+        Pagination<PlaceReservedNotReviewedDto> pagination
+                = new Pagination<>(5, pageable, notReviewedList);
+
+        model.addAttribute("notReviewedList", notReviewedList);
+        model.addAttribute("pagination", pagination);
     }
 
-    @GetMapping("/tickets/inquiry-list")
-    public void goToTicketsInquiryList() {
+    @GetMapping("/reviews/wrote")
+    public void goToReviewsWrote(@RequestParam(value = "page", defaultValue = "1") int page,
+                                 @AuthenticationPrincipal UserDetailsDto userDetailsDto,
+                                 Model model) {
+        Pageable pageable = PageRequest.of(page - 1, 5);
+
+        Page<MypageReviewListDto> reviewedList
+                = userService.findReviewedList(userDetailsDto.getId(), pageable);
+        Pagination<MypageReviewListDto> pagination
+                = new Pagination<>(5, pageable, reviewedList);
+
+        model.addAttribute("reviewedList", reviewedList);
+        model.addAttribute("pagination", pagination);
     }
 
     @GetMapping("/places")
-    public void goToPlaces() {
+    public void goToPlaces(@RequestParam(value = "page", defaultValue = "1") int page,
+                           @AuthenticationPrincipal UserDetailsDto userDetailsDto,
+                           Model model) {
+        Pageable pageable = PageRequest.of(page - 1, 6);
+
+        Page<PlaceManageListDto> hostPlacesPage
+                = userService.findHostPlacesPage(userDetailsDto.getId(), pageable);
+        Pagination<PlaceManageListDto> pagination
+                = new Pagination<>(5, pageable, hostPlacesPage);
+
+        model.addAttribute("hostPlacesPage", hostPlacesPage);
+        model.addAttribute("pagination", pagination);
     }
 
-    @GetMapping("/places/inquiry-list")
-    public void goToPlacesInquiryList() {
+    @GetMapping("/places/inquiries/{placeId}")
+    public String goToPlacesInquiryList(@PathVariable("placeId") Long placeId,
+                                        @AuthenticationPrincipal UserDetailsDto userDetailsDto,
+                                        Model model) {
+
+        ContractedPlaceDto placeDto = userService.findPlaceBriefly(placeId, userDetailsDto.getId()).orElseThrow(
+                NoSuchElementException::new
+        );
+
+        model.addAttribute("placeDto", placeDto);
+
+        return "/mypage/places/inquiries";
     }
 
-    @GetMapping("/places/reservation-list")
-    public void goToPlacesReservationList() {
+    @GetMapping("/places/reservations/{placeId}")
+    public String goToPlacesReservationList(@PathVariable("placeId") Long placeId,
+                                            @AuthenticationPrincipal UserDetailsDto userDetailsDto,
+                                            Model model) {
+
+        ContractedPlaceDto placeDto = userService.findPlaceBriefly(placeId, userDetailsDto.getId()).orElseThrow(
+                NoSuchElementException::new
+        );
+
+        model.addAttribute("placeDto", placeDto);
+
+        return "/mypage/places/reservations";
+    }
+
+    @GetMapping("/tickets")
+    public void goToTickets(@RequestParam(value = "page", defaultValue = "1") int page,
+                            @RequestParam(value = "view", defaultValue = "all") String viewType,
+                            @AuthenticationPrincipal UserDetailsDto userDetailsDto,
+                            Model model) {
+        Pageable pageable = PageRequest.of(page - 1, 5);
+
+        TicketRequestType ticketRequestType = TicketRequestType.valueOf(viewType);
+
+        TicketPage ticketPage
+                = userService.findHostTicketsPage(userDetailsDto.getId(), pageable, ticketRequestType);
+        Pagination<TicketManageListDto> pagination
+                = new Pagination<>(5, pageable, ticketPage.getPage());
+
+
+        model.addAttribute("ticketPage", ticketPage);
+        model.addAttribute("pagination", pagination);
+        model.addAttribute("viewType", viewType);
+    }
+
+    @GetMapping("/tickets/inquiries/{ticketId}")
+    public String goToTicketsInquiryList(@PathVariable("ticketId") Long ticketId,
+                                         @AuthenticationPrincipal UserDetailsDto userDetailsDto,
+                                         Model model) {
+
+        TicketInfoDto ticketInfo = userService.findTicketInfo(ticketId, userDetailsDto.getId()).orElseThrow(
+                NoSuchElementException::new
+        );
+
+        model.addAttribute("ticketInfo", ticketInfo);
+
+        return "/mypage/tickets/inquiries";
     }
 
     private String getMaskedEmail(String email) {

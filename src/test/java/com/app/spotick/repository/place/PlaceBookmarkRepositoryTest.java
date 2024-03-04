@@ -4,6 +4,7 @@ import com.app.spotick.domain.dto.place.PlaceListDto;
 import com.app.spotick.domain.embedded.post.PostAddress;
 import com.app.spotick.domain.entity.place.*;
 import com.app.spotick.domain.entity.user.User;
+import com.app.spotick.domain.entity.viewModel.PlaceBookmarkCount;
 import com.app.spotick.domain.type.post.PostStatus;
 import com.app.spotick.domain.type.user.UserStatus;
 import com.app.spotick.repository.place.bookmark.PlaceBookmarkRepository;
@@ -150,11 +151,11 @@ class PlaceBookmarkRepositoryTest {
     void tupleTest(){
         JPQLQuery<Double> reviewAvg = JPAExpressions.select(placeReview.score.avg())
                 .from(placeReview)
-                .where(placeReview.place.eq(place));
+                .where(placeReview.placeReservation.place.eq(place));
 
         JPQLQuery<Long> reviewCount = JPAExpressions.select(placeReview.count())
                 .from(placeReview)
-                .where(placeReview.place.eq(place));
+                .where(placeReview.placeReservation.place.eq(place));
 
         JPQLQuery<Long> bookmarkCount = JPAExpressions.select(placeBookmark.count())
                 .from(placeBookmark)
@@ -183,6 +184,13 @@ class PlaceBookmarkRepositoryTest {
             System.out.println("tuple.get(place.title) = " + tuple.get(place.title));
         }
     }
+
+//    @Test
+//    void bookmarkCountTest(){
+//        List<PlaceBookmarkCount> fetch = queryFactory.selectFrom(placeBookmarkCount)
+//                .fetch();
+//        System.out.println("fetch = " + fetch);
+//    }
 
 
 }

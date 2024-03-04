@@ -2,6 +2,7 @@ package com.app.spotick.domain.entity.ticket;
 
 import com.app.spotick.domain.base.image.ImageBase;
 import com.app.spotick.domain.entity.place.Place;
+import com.app.spotick.domain.entity.promotion.PromotionBoard;
 import com.app.spotick.domain.entity.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,18 +15,13 @@ public class TicketFile extends ImageBase {
     @Column(name = "TICKET_FILE_ID")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_ID")
-    private User user;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TICKET_ID")
+    @OneToOne(mappedBy = "ticketFile", fetch = FetchType.LAZY)
     private Ticket ticket;
 
     @Builder
-    public TicketFile(String fileName, String uuid, String uploadPath, Long id, User user, Ticket ticket) {
+    public TicketFile(String fileName, String uuid, String uploadPath, Long id, Ticket ticket) {
         super(fileName, uuid, uploadPath);
         this.id = id;
-        this.user = user;
         this.ticket = ticket;
     }
 }

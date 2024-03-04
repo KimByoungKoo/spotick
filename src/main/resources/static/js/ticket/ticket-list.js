@@ -1,74 +1,5 @@
-// 아이템 이미지 슬라이드
-// 모든 OneItemContainer에 대해 반복
-document.querySelectorAll('.OneItemContainer').forEach(function (container, index) {
-    // 현재 container의 ImageSwiper 클래스를 가진 요소를 찾음
-    var swiperContainer = container.querySelector('.ImageSwiper');
+import {requestLike} from "../modules/likeFetch.js"
 
-    // Swiper 초기화
-    var swiper = new Swiper(swiperContainer, {
-        pagination: {
-            el: swiperContainer.querySelector('.swiper-pagination'),
-            clickable: true,
-        },
-        navigation: {
-            nextEl: swiperContainer.querySelector('.RightBtn'),
-            prevEl: swiperContainer.querySelector('.LeftBtn'),
-        },
-        on: {
-            slideChange: function () {
-                handleSlideChange(this);
-
-            },
-        },
-    });
-
-    // 슬라이드 index최대값
-    page(swiper);
-
-
-    // 초기 페이지네이션 업데이트
-    updatePagination(swiper);
-});
-
-function handleSlideChange(swiper) {
-    var snapIndexElement = swiper.el.querySelector(".snapIndex");
-    if (snapIndexElement) {
-        snapIndexElement.textContent = swiper.snapIndex + 1;
-    }
-}
-
-function page(swiper){
-    var pageIndex = swiper.el.querySelector(".slideIndex");
-    if (pageIndex) {
-        pageIndex.textContent = swiper.slides.length;
-    }
-    // 슬라이드가 1개일 경우 hover 없애기
-    if(swiper.slides.length === 1){
-        // 부모 노드를 탐색하면서 hover 클래스를 가진 부모를 찾습니다.
-        let parentWithHoverClass = null;
-        let parentNode = pageIndex.parentElement;
-        let parentContainer = pageIndex.parentElement.parentElement;
-        console.log(parentContainer)
-
-        while (parentNode) {
-            if (parentNode.classList.contains("hover")) {
-                parentWithHoverClass = parentNode;
-                break;
-            }
-            parentNode = parentNode.parentElement;
-        }
-
-        if (parentWithHoverClass) {
-            parentContainer.style.display = "none";
-            parentWithHoverClass.classList.remove("hover");
-        }
-    }
-
-}
-
-function updatePagination(swiper) {
-    swiper.pagination.update(); // Swiper에게 페이지네이션을 다시 그리도록 알림
-}
 // ===================================================================================================================
 // 필터쪽 체크박스
 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
@@ -90,10 +21,10 @@ const SelectBoxBtnText = document.querySelector('.SelectBoxBtnText');
 
 // 좋아요 버튼
 function toggleLike(btn) {
-    var likeIcon = btn.querySelector('.ItemLikeBtn img');
+    let likeIcon = btn.querySelector('.ItemLikeBtn img');
 
     // 이미지를 토글
-    likeIcon.src = likeIcon.src.includes('heart_line') ? '../../static/imgs/heart_filled_white_shadow.708fbebd.png' : '../../static/imgs/heart_line_white_shadow.d5d214d0.png';
+    likeIcon.src = likeIcon.src.includes('heart_line') ? '/imgs/heart_filled_white_shadow.708fbebd.png' : '/imgs/heart_line_white_shadow.d5d214d0.png';
 }
 
 // 인기순 필터
@@ -102,7 +33,7 @@ selectBoxBtn.addEventListener('click', function () {
     selectBoxList.style.display = (selectBoxList.style.display === 'block') ? 'none' : 'block';
 
     // 이미지 변경
-    selectBoxBtnImg.src = (selectBoxList.style.display === 'block') ? '../../static/imgs/arrow_up_gray014.75d8599e.svg' : '../../static/imgs/arrow_down_gray014.f502da9d.svg';
+    selectBoxBtnImg.src = (selectBoxList.style.display === 'block') ? '/imgs/arrow_up_gray014.75d8599e.svg' : '/imgs/arrow_down_gray014.f502da9d.svg';
 });
 
 // 각 리스트 아이템에 대한 이벤트 리스너 추가
@@ -122,22 +53,22 @@ listItems.forEach(item => {
         selectBoxList.style.display = 'none';
 
         // 이미지 변경
-        selectBoxBtnImg.src = '../../static/imgs/arrow_down_gray014.f502da9d.svg';
+        selectBoxBtnImg.src = '/imgs/arrow_down_gray014.f502da9d.svg';
     });
 });
 
 // 필터 모달창 나오기
-document.querySelector('.FilterBtn').addEventListener("click", function(){
+document.querySelector('.FilterBtn').addEventListener("click", function () {
     document.querySelector('.FilterModalContainer').classList.add('On');
 })
 
 // 필터 모달창 숨기기
-document.querySelector('.FilterModalCloseBtn').addEventListener("click", function(){
+document.querySelector('.FilterModalCloseBtn').addEventListener("click", function () {
     document.querySelector('.FilterModalContainer').classList.remove('On');
 })
 
 // 필터 적용 버튼
-document.querySelector('.FilterSubmitBtn').addEventListener("click", function(){
+document.querySelector('.FilterSubmitBtn').addEventListener("click", function () {
     document.querySelector('.FilterModalContainer').classList.remove('On');
 })
 
@@ -160,7 +91,7 @@ checkboxes.forEach(checkbox => {
                 });
 
                 checkboxImages.forEach(img => {
-                    img.src = '../../static/imgs/rectangle_line_rainyBlue086.76bf0d5f.svg';
+                    img.src = '/imgs/rectangle_line_rainyBlue086.76bf0d5f.svg';
                 });
 
                 // 선택된 지역 리스트 초기화
@@ -168,7 +99,7 @@ checkboxes.forEach(checkbox => {
 
                 changeSize(405);
 
-                checkBoxImg.src = '../../static/imgs/checkRectangle_filled_sweetBlue046.0cd80fee.svg';
+                checkBoxImg.src = '/imgs/checkRectangle_filled_sweetBlue046.0cd80fee.svg';
                 selectedListContainer.classList.add('On');
 
                 // 선택된 지역 리스트에 아이템 추가
@@ -190,7 +121,7 @@ checkboxes.forEach(checkbox => {
                     const checkBoxImg = checkBoxContainer.querySelector('.CheckBoxImg');
                     const checkBoxText = checkBoxContainer.querySelector('.CheckBoxText');
 
-                    checkBoxImg.src = '../../static/imgs/rectangle_line_rainyBlue086.76bf0d5f.svg';
+                    checkBoxImg.src = '/imgs/rectangle_line_rainyBlue086.76bf0d5f.svg';
 
                     // 선택된 지역 리스트에서 아이템 삭제
                     const itemsToRemove = SelectItemContainer.querySelectorAll('.SelectedItemText');
@@ -203,7 +134,8 @@ checkboxes.forEach(checkbox => {
 
                 changeSize(405);
 
-                checkBoxImg.src = '../../static/imgs/checkRectangle_filled_sweetBlue046.0cd80fee.svg';
+                checkBoxImg.src = '' +
+                    '/imgs/checkRectangle_filled_sweetBlue046.0cd80fee.svg';
                 selectedListContainer.classList.add('On');
 
                 // 선택된 지역 리스트에 아이템 추가
@@ -218,7 +150,7 @@ checkboxes.forEach(checkbox => {
             }
 
         } else {
-            checkBoxImg.src = '../../static/imgs/rectangle_line_rainyBlue086.76bf0d5f.svg';
+            checkBoxImg.src = '/imgs/rectangle_line_rainyBlue086.76bf0d5f.svg';
 
             // 선택된 지역 리스트에서 아이템 삭제
             const itemsToRemove = SelectItemContainer.querySelectorAll('.SelectedItemText');
@@ -228,7 +160,6 @@ checkboxes.forEach(checkbox => {
                 }
             });
         }
-
 
 
         const checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
@@ -241,11 +172,11 @@ checkboxes.forEach(checkbox => {
 
         if (numberOfCheckedCheckboxes === 5) {
             checkboxes.forEach(checkbox => {
-                if(!checkbox.checked && checkbox.name !== "전체"){
+                if (!checkbox.checked && checkbox.name !== "전체") {
                     checkbox.disabled = true;
                 }
             })
-        }else{
+        } else {
             checkboxes.forEach(checkbox => {
                 checkbox.disabled = false;
             })
@@ -270,14 +201,14 @@ resetButton.addEventListener('click', function () {
 });
 
 // 체크박스 전체 해제
-function reset(){
+function reset() {
     // 전체 체크박스 해제
     checkboxes.forEach(checkbox => {
         checkbox.checked = false;
     });
 
     checkboxImages.forEach(img => {
-        img.src = '../../static/imgs/rectangle_line_rainyBlue086.76bf0d5f.svg';
+        img.src = '/imgs/rectangle_line_rainyBlue086.76bf0d5f.svg';
     });
 
     // 선택된 지역 리스트 초기화
@@ -321,3 +252,42 @@ function toggleCityContainer(targetId) {
         targetContainer.classList.add('On');
     }
 }
+
+function changeLike(btn, status) {
+    // status에 따라서 클래스 변경
+    const off = btn.children[0];
+    const on = btn.children[1];
+
+    if (status) {
+        off.classList.add('none');
+        on.classList.remove('none')
+    } else {
+        off.classList.remove('none');
+        on.classList.add('none')
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+HTMLCollection.prototype.forEach = Array.prototype.forEach;
+
+document.getElementsByClassName('ItemLikeBtn').forEach(likeBtn => {
+    likeBtn.addEventListener('click', function () {
+        let isLoggedIn = document.getElementById('isLoggedIn').value;
+        if (isLoggedIn === 'false') {
+            alert('로그인이 필요한 서비스 입니다');
+            location.href = '/user/login';
+            return;
+        }
+
+        let status = this.getAttribute('data-status');
+        const ticketId = this.getAttribute('data-id');
+
+        requestLike(status, ticketId, (result) => {
+            this.setAttribute('data-status', result);
+
+            changeLike(this, result);
+        });
+    })
+});
+
+

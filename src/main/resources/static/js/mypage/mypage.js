@@ -45,6 +45,10 @@ function closeModal() {
     });
 }
 
+function closeOnlyThisModal(target) {
+    target.classList.remove('show');
+}
+
 function showGlobalDialogue(dialogueString) {
     globalDialogueContent.innerHTML = dialogueString;
     openModal(globalDialogue);
@@ -56,7 +60,7 @@ function showGlobalSelection(dialogueString, callback) {
     openModal(globalSelection);
 }
 
-function closeGlobalSelection(){
+function closeGlobalSelection() {
     globalSelection.classList.remove('show')
 
     if (!(modalReservation?.classList.contains('show') || modalReviewForm?.classList.contains('show'))) {
@@ -66,7 +70,6 @@ function closeGlobalSelection(){
 
 function toggleDropdown(button) {
     let dropdown = button.querySelector('.mpc-dropdown');
-    console.log(dropdown);
     dropdown.classList.toggle('show');
 }
 
@@ -85,3 +88,72 @@ topNavigationButtons.forEach(button => {
         button.classList.add('active');
     });
 });
+
+function scrollToTop() {
+    const duration = 300;
+    const start = window.scrollY;
+    const target = 0;
+    const startTime = performance.now();
+
+    function animateScroll() {
+        const currentTime = performance.now();
+        const elapsed = currentTime - startTime;
+
+        const easedTime = (elapsed / duration) < 0.5
+            ? 2 * Math.pow(elapsed / duration, 2)
+            : -1 + (4 - 2 * elapsed / duration) * (elapsed / duration);
+
+        window.scrollTo(0, start + (target - start) * easedTime);
+
+        if (elapsed < duration) {
+            requestAnimationFrame(animateScroll);
+        }
+    }
+
+    animateScroll();
+}
+
+function vibrateTarget(target) {
+    target.classList.add('vibration');
+
+    setTimeout(function() {
+        target.classList.remove("vibration");
+    }, 200);
+}
+
+// 날짜를 한국어 방식으로 변경
+function formatKoreanDatetime(datetimeString) {
+    return new Date(datetimeString).toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: false,
+    });
+}
+
+function formatKoreanDate(dateString) {
+    return new Date(dateString).toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+function dateDifferenceInDays(date1, date2) {
+    const oneDay = 24 * 60 * 60 * 1000;
+
+    const timeDifference = Math.abs(date2.getTime() - date1.getTime());
+
+    return Math.round(timeDifference / oneDay);
+}
+
+function formatDate(date) {
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}

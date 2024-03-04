@@ -8,7 +8,7 @@ function showGSForCancelingReservation(reservationId) {
 function cancelReservation(reservationId) {
     closeModal();
 
-    fetch('/mypage/reservation/' + reservationId + '/cancel', {
+    fetch(`/reservation/api/cancel/${reservationId}`, {
         method: 'GET'
     })
         .then(response => {
@@ -36,7 +36,7 @@ function showGSForRemoveHistory(reservationId) {
 function removeHistory(reservationId) {
     closeModal();
 
-    fetch('/mypage/reservation/' + reservationId + '/delete', {
+    fetch(`/reservation/api/delete/${reservationId}`, {
         method: 'GET'
     })
         .then(response => {
@@ -93,3 +93,12 @@ function showDetail(item) {
     calendarService.setEventDates(checkIn, checkOut);
     calendarService.buildCalendar();
 }
+
+///////////////////////////////////////////////////////////////////
+document.querySelectorAll('.reservationPay').forEach(pay => {
+    pay.addEventListener('click', function () {
+        let reservationId = this.getAttribute('data-id');
+
+        payService.requestPlacePaymentSave(reservationId, payService.payItem);
+    })
+})

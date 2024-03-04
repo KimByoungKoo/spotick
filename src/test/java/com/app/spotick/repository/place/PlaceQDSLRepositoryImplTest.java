@@ -1,7 +1,8 @@
 package com.app.spotick.repository.place;
 
 import com.app.spotick.domain.dto.place.PlaceDetailDto;
-import com.app.spotick.domain.dto.place.PlaceFileDto;
+import com.app.spotick.domain.dto.place.PlaceDto;
+import com.app.spotick.domain.dto.place.file.PlaceFileDto;
 import com.app.spotick.domain.dto.place.PlaceListDto;
 import com.app.spotick.domain.dto.place.reservation.PlaceReserveBasicInfoDto;
 import com.app.spotick.domain.embedded.post.PostAddress;
@@ -15,6 +16,7 @@ import com.app.spotick.repository.place.bookmark.PlaceBookmarkRepository;
 import com.app.spotick.repository.place.file.PlaceFileRepository;
 import com.app.spotick.repository.user.UserAuthorityRepository;
 import com.app.spotick.repository.user.UserRepository;
+import com.app.spotick.util.type.SortType;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.Projections;
@@ -33,18 +35,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.app.spotick.domain.entity.place.QPlace.place;
 import static com.app.spotick.domain.entity.place.QPlaceBookmark.placeBookmark;
 import static com.app.spotick.domain.entity.place.QPlaceFile.placeFile;
 import static com.app.spotick.domain.entity.place.QPlaceReview.placeReview;
+import static com.querydsl.core.group.GroupBy.groupBy;
 import static com.querydsl.core.group.GroupBy.list;
 
 
@@ -230,14 +232,15 @@ class PlaceQDSLRepositoryImplTest {
                 .fetch();
 
 //        사진정보를 장소 id별로 묶는다
-//        Map<Long, List<PlaceFileDto>> fileListMap = fileDtoList.stream().collect(Collectors.groupingBy(PlaceFileDto::getPlaceId));
+        Map<Long, List<PlaceFileDto>> fileListMap = fileDtoList.stream().collect(Collectors.groupingBy(PlaceFileDto::getPlaceId));
 
 //        장소 id별로 구분된 사진들을 각각 게시글 번호에 맞게 추가한다
-//        placeListDtos.forEach(place -> {
-//            place.updatePlaceFiles(fileListMap.get(place.getId())
-//                    .stream().limit(5L).toList());
-//        });
+        placeListDtos.forEach(place -> {
+            place.updatePlaceFiles(fileListMap.get(place.getId())
+                    .stream().limit(5L).toList());
+        });
 
+        placeListDtos.forEach(System.out::println);
     }
 
     @Test
@@ -461,7 +464,7 @@ class PlaceQDSLRepositoryImplTest {
     @Test
     void transFormTest2() {
         PageRequest pageRequest = PageRequest.of(0, 12);
-        List<PlaceListDto> placeListPaging = placeRepository.findPlaceListPaging(pageRequest, null);
+        Slice<PlaceListDto> placeListPaging = placeRepository.findPlaceListPaging(pageRequest, null, SortType.NEWEST,null,null);
 
         placeListPaging.forEach(place -> {
             System.out.println("place = " + place);
@@ -505,6 +508,50 @@ class PlaceQDSLRepositoryImplTest {
         log.info("placeReserveBasicInfoDto : {}", placeReserveBasicInfoDto);
 
 
+    }
+
+    @Test
+    public void onePlaceInfo() {
+        PlaceDto placeDto = queryFactory.select(place)
+                .from(place)
+                .leftJoin(place.placeFileList, placeFile)
+                .where(
+                        place.id.eq(1L),
+                        place.user.id.eq(2L),
+                        place.placeStatus.ne(PostStatus.DELETED)
+                )
+                .transform(groupBy(place.id)
+                        .list(Projections.constructor(PlaceDto.class,
+                                place.id,
+                                place.title,
+                                place.subTitle,
+                                place.lat,
+                                place.lng,
+                                place.placeAddress,
+                                list(
+                                        Projections.constructor(PlaceFileDto.class,
+                                                placeFile.id,
+                                                placeFile.fileName,
+                                                placeFile.uuid,
+                                                placeFile.uploadPath,
+                                                placeFile.place.id
+                                        )
+                                ),
+                                place.info,
+                                place.rule,
+                                place.defaultPeople,
+                                place.price,
+                                place.surcharge,
+                                place.bankName,
+                                place.accountNumber,
+                                place.accountHolder
+                        ))
+                )
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        System.out.println("fetch = " + placeDto);
     }
 
 

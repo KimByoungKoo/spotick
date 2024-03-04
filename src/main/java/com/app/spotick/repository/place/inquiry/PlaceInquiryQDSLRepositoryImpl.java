@@ -1,16 +1,16 @@
 package com.app.spotick.repository.place.inquiry;
 
-import com.app.spotick.domain.dto.place.PlaceFileDto;
+import com.app.spotick.domain.dto.place.file.PlaceFileDto;
 import com.app.spotick.domain.dto.place.PlaceInquiryListDto;
+import com.app.spotick.domain.dto.place.inquiry.UnansweredInquiryDto;
 import com.app.spotick.domain.entity.place.PlaceInquiry;
+import com.app.spotick.domain.type.post.PostStatus;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
@@ -20,10 +20,13 @@ import static com.app.spotick.domain.entity.place.QPlaceBookmark.placeBookmark;
 import static com.app.spotick.domain.entity.place.QPlaceFile.placeFile;
 import static com.app.spotick.domain.entity.place.QPlaceInquiry.placeInquiry;
 import static com.app.spotick.domain.entity.place.QPlaceReview.placeReview;
+import static com.app.spotick.domain.entity.user.QUser.*;
+import static com.app.spotick.domain.entity.user.QUserProfileFile.*;
 
 @RequiredArgsConstructor
 public class PlaceInquiryQDSLRepositoryImpl implements PlaceInquiryQDSLRepository {
     private final JPAQueryFactory queryFactory;
+
     @Override
     public Page<PlaceInquiry> inquiryListWithPage(Long placeId, Pageable pageable) {
 
@@ -40,7 +43,7 @@ public class PlaceInquiryQDSLRepositoryImpl implements PlaceInquiryQDSLRepositor
                 .where(placeInquiry.place.id.eq(placeId))
                 .fetchOne();
 
-        return new PageImpl<>(contents,pageable,totalCount);
+        return new PageImpl<>(contents, pageable, totalCount);
     }
 
     @Override
@@ -48,7 +51,8 @@ public class PlaceInquiryQDSLRepositoryImpl implements PlaceInquiryQDSLRepositor
 
         JPQLQuery<Long> totalCountQuery = queryFactory.select(placeInquiry.count())
                 .from(placeInquiry)
-                .where(placeInquiry.user.id.eq(userId));
+                .join(placeInquiry.place, place)
+                .where(placeInquiry.user.id.eq(userId), place.placeStatus.eq(PostStatus.APPROVED));
 
         JPQLQuery<Double> reviewAvg = JPAExpressions.select(placeReview.score.avg())
                 .from(placeReview)
@@ -95,7 +99,8 @@ public class PlaceInquiryQDSLRepositoryImpl implements PlaceInquiryQDSLRepositor
                                 bookmarkCount,
                                 placeInquiry.title,
                                 placeInquiry.content,
-                                placeInquiry.response
+                                placeInquiry.response,
+                                placeInquiry.response.isNotNull()
                         )
                 )
                 .fetch();
@@ -106,6 +111,45 @@ public class PlaceInquiryQDSLRepositoryImpl implements PlaceInquiryQDSLRepositor
 
 
         return PageableExecutionUtils.getPage(placeInquiryListDtos, pageable, totalCountQuery::fetchOne);
+    }
+
+    @Override
+    public Slice<UnansweredInquiryDto> findUnansweredInquiriesPage(Long placeId, Long userId, Pageable pageable) {
+
+        List<UnansweredInquiryDto> contents = queryFactory
+                .from(placeInquiry)
+                .join(placeInquiry.user, user)
+                .join(user.userProfileFile, userProfileFile)
+                .where(
+                        placeInquiry.place.id.eq(placeId),
+                        place.user.id.eq(userId),
+                        placeInquiry.response.isNull()
+                )
+                .orderBy(placeInquiry.id.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize() + 1)
+                .select(
+                        Projections.constructor(UnansweredInquiryDto.class,
+                                placeInquiry.id,
+                                placeInquiry.title,
+                                placeInquiry.content,
+                                user.nickName,
+                                userProfileFile.fileName,
+                                userProfileFile.uuid,
+                                userProfileFile.uploadPath,
+                                userProfileFile.isDefaultImage
+                        )
+                )
+                .fetch();
+
+        boolean hasNext = false;
+
+        if(contents.size() > pageable.getPageSize()){
+            contents.remove(pageable.getPageSize());
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(contents, pageable, hasNext);
     }
 }
 

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Spotick | 예약내역</title>
+    <link href="/imgs/logo/favicon.png" rel="icon">
     <link href="/css/global-css/root.css" rel="stylesheet">
     <link href="/css/global-css/chat.css" rel="stylesheet">
     <link href="/css/mypage/mypage.css" rel="stylesheet">
@@ -134,7 +135,8 @@
                                                  th:onclick="'showGSForCancelingReservation(\'' + *{reservationId} + '\')'">
                                                 예약 취소
                                             </div>
-                                            <div class="action-item" th:onclick="'showGSForRemoveHistory(\'' + *{reservationId} + '\')'"
+                                            <div class="action-item"
+                                                 th:onclick="'showGSForRemoveHistory(\'' + *{reservationId} + '\')'"
                                                  th:unless="*{reservationStatus == reservationStatus.PENDING
                                                 or reservationStatus == reservationStatus.WAITING_PAYMENT}">기록
                                                 삭제
@@ -142,12 +144,13 @@
                                         </div>
                                     </button>
                                 </div>
-                                <div class="mpcr-img-con">
+                                <a class="mpcr-img-con"
+                                   th:href="@{/place/detail/{placeId}(placeId = ${reservationDto.id})}">
                                     <img style="width: 180px;"
                                          th:alt="*{title}"
                                          th:src="*{'/file/display?fileName='
                                          + placeFileDto.uploadPath + '/t_' + placeFileDto.uuid + '_' + placeFileDto.fileName}">
-                                </div>
+                                </a>
                                 <div class="ItemTextContainer">
                                     <div class="ItemHostNameContainer">
                                         <span class="ItemHostName" th:text="*{placeAddress.address}"></span>
@@ -164,9 +167,10 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="ItemSpaceNameContainer">
+                                    <a class="ItemSpaceNameContainer"
+                                       th:href="@{/place/detail/{placeId}(placeId = ${reservationDto.id})}">
                                         <p class="ItemSpaceName" th:text="*{title}"></p>
-                                    </div>
+                                    </a>
                                     <div class="ItemPriceContainer">
                                         <span class="ItemPrice"
                                               th:text="${#numbers.formatInteger(reservationDto.price, 3, 'COMMA')} + '원'"></span>
@@ -175,8 +179,7 @@
                                         <div class="mpccc-status">
                                             <span th:text="*{reservationStatus.displayName}"></span>
                                         </div>
-                                        <button class="mpccc-btn"
-                                                onclick="payItem()"
+                                        <button class="mpccc-btn reservationPay" th:data-id="*{reservationId}"
                                                 th:if="*{reservationStatus == reservationStatus.WAITING_PAYMENT}"
                                                 type="button">
                                             <span>결제 하기</span>
@@ -217,7 +220,7 @@
                     </th:block>
                 </th:block>
             </div>
-            <th:block th:if="${reservationDtoList.empty}">
+            <th:block th:if="${reservationDtoList.getTotalElements() == 0}">
                 <div class="mp-no-list">
                     <span>예약내역이 없습니다.</span>
                 </div>
@@ -231,19 +234,21 @@
                     <i class="fa-solid fa-chevron-left"></i>
                     <i class="fa-solid fa-chevron-left"></i>
                 </a>
-                <a class="pagination-btns" th:href="@{/mypage/reservations(page=${pagination.startPage - 1})}" title="이전">
+                <a class="pagination-btns" th:href="@{/mypage/reservations(page=${pagination.startPage - 1})}"
+                   title="이전">
                     <i class="fa-solid fa-chevron-left"></i>
                 </a>
             </span>
 
-                    <span class="pagination-body">
-                <span class="pagination-btns" th:each="i : ${#numbers.sequence(pagination.startPage, pagination.endPage)}">
-                    <a th:href="@{/mypage/reservations(page=${i})}" th:text="${i}"
-                       th:class="${i == pagination.currentPage ? 'active' : ''}"></a>
+            <span class="pagination-body">
+                <span class="pagination-btns"
+                      th:each="i : ${#numbers.sequence(pagination.startPage, pagination.endPage)}">
+                    <a th:class="${i == pagination.currentPage ? 'active' : ''}" th:href="@{/mypage/reservations(page=${i})}"
+                       th:text="${i}"></a>
                 </span>
             </span>
 
-                    <span class="pagination-next" th:if="${pagination.hasNextBlock()}">
+            <span class="pagination-next" th:if="${pagination.hasNextBlock()}">
                 <a class="pagination-btns" th:href="@{/mypage/reservations(page=${pagination.endPage+1})}" title="다음">
                     <i class="fa-solid fa-chevron-right"></i>
                 </a>
@@ -262,13 +267,13 @@
 
 </body>
 <script src="https://code.jquery.com/jquery-3.6.4.js"></script>
-<script src="/js/global-js/global.js"></script>
-<script src="/js/mypage/mypage.js"></script>
-<script src="/js/mypage/reservations.js"></script>
-<script src="/js/global-js/calendar.js"></script>
 <script src="https://js.bootpay.co.kr/bootpay-4.3.4.min.js" type="application/javascript"></script>
 <script src="/js/global-js/bootpay.js"></script>
-<script src="/js/global-js/chat.js"></script>
+<script src="/js/global-js/calendar.js"></script>
+<script src="/js/global-js/chat.js" type="module"></script>
+<script src="/js/global-js/global.js" type="module"></script>
+<script src="/js/mypage/mypage.js"></script>
+<script src="/js/mypage/reservations.js"></script>
 <script>
     document.getElementById('reservations').classList.add('active');
 </script>

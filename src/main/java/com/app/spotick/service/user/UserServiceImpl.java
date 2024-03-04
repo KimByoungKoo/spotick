@@ -1,25 +1,38 @@
 package com.app.spotick.service.user;
 
+import com.app.spotick.api.dto.user.UserFindEmailDto;
+import com.app.spotick.domain.dto.page.TicketPage;
 import com.app.spotick.domain.dto.place.PlaceListDto;
+import com.app.spotick.domain.dto.place.PlaceManageListDto;
 import com.app.spotick.domain.dto.place.PlaceReservationListDto;
+import com.app.spotick.domain.dto.place.reservation.PlaceReservedNotReviewedDto;
+import com.app.spotick.domain.dto.place.review.ContractedPlaceDto;
+import com.app.spotick.domain.dto.place.review.MypageReviewListDto;
+import com.app.spotick.domain.dto.ticket.TicketInfoDto;
 import com.app.spotick.domain.dto.user.UserDetailsDto;
 import com.app.spotick.domain.dto.user.UserJoinDto;
 import com.app.spotick.domain.dto.user.UserProfileDto;
 import com.app.spotick.domain.entity.user.User;
 import com.app.spotick.domain.entity.user.UserAuthority;
 import com.app.spotick.domain.entity.user.UserProfileFile;
+import com.app.spotick.domain.type.ticket.TicketRequestType;
 import com.app.spotick.domain.type.user.AuthorityType;
+import com.app.spotick.repository.place.PlaceRepository;
+import com.app.spotick.repository.place.Review.PlaceReviewRepository;
 import com.app.spotick.repository.place.bookmark.PlaceBookmarkRepository;
 import com.app.spotick.repository.place.reservation.PlaceReservationRepository;
+import com.app.spotick.repository.ticket.TicketRepository;
 import com.app.spotick.repository.user.UserAuthorityRepository;
 import com.app.spotick.repository.user.UserRepository;
 import com.app.spotick.service.redis.RedisService;
+import com.app.spotick.service.util.MailService;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.NurigoApp;
 import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mail.MailSendException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,8 +40,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.ConnectException;
 import java.time.Duration;
+import java.time.format.DateTimeFormatter;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -40,9 +56,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final UserAuthorityRepository authorityRepository;
     private final UserProfileFileService profileFileService;
+    private final PlaceRepository placeRepository;
     private final PlaceBookmarkRepository placeBookmarkRepository;
     private final PlaceReservationRepository placeReservationRepository;
+    private final PlaceReviewRepository placeReviewRepository;
+    private final TicketRepository ticketRepository;
     private final RedisService redisService;
+    private final MailService mailService;
 
     @Override
     public void join(UserJoinDto userJoinDto) {
@@ -51,7 +71,21 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         UserProfileFile userProfileFile = profileFileService.saveDefaultRandomImgByUser();
 
         User savedUser = userRepository.save(userJoinDto.toEntity(userProfileFile));
+        userJoinDto.setId(savedUser.getId());
 //      권한 추가
+        authorityRepository.save(UserAuthority.builder()
+                .authorityType(AuthorityType.ROLE_USER)
+                .user(savedUser)
+                .build());
+    }
+
+    @Override
+    public void join(UserJoinDto userJoinDto, UserProfileFile userProfileFile) {
+        userJoinDto.setPassword(encodePassword(userJoinDto.getPassword()));
+
+        User savedUser = userRepository.save(userJoinDto.toEntity(userProfileFile));
+        userJoinDto.setId(savedUser.getId());
+
         authorityRepository.save(UserAuthority.builder()
                 .authorityType(AuthorityType.ROLE_USER)
                 .user(savedUser)
@@ -61,11 +95,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User foundUser = userRepository.findUserAndProfileByEmail(username);
+        User foundUser = userRepository.findUserAndProfileByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일로 등록된 회원 없음"));
 
-        if (foundUser == null) {
-            throw new UsernameNotFoundException("해당 이메일로 등록된 회원 없음");
-        }
         return new UserDetailsDto(foundUser, authorityRepository.findUserAuthorityByUser(foundUser));
     }
 
@@ -128,7 +160,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User foundUser = userRepository.findById(userId).orElseThrow(
                 NoSuchElementException::new
         );
+        foundUser.updatePassword(encodePassword(newPassword));
+    }
 
+    @Override
+    public void updatePassword(String email, String newPassword) {
+        User foundUser = userRepository.findUserByEmail(email).orElseThrow(
+                NoSuchElementException::new
+        );
         foundUser.updatePassword(encodePassword(newPassword));
     }
 
@@ -144,6 +183,40 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return placeReservationRepository.findReservationsByUserId(userId, pageable);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PlaceReservedNotReviewedDto> findPlacesNotReviewed(Long userId, Pageable pageable) {
+        return placeRepository.findPlaceListNotRelatedToReview(userId, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MypageReviewListDto> findReviewedList(Long userId, Pageable pageable) {
+        return placeReviewRepository.findReviewsByUserId(userId, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PlaceManageListDto> findHostPlacesPage(Long userId, Pageable pageable) {
+        return placeRepository.findHostPlaceListByUserId(userId, pageable);
+    }
+
+    @Override
+    public Optional<ContractedPlaceDto> findPlaceBriefly(Long placeId, Long userId) {
+        return placeRepository.findPlaceBriefly(placeId, userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TicketPage findHostTicketsPage(Long userId, Pageable pageable, TicketRequestType ticketRequestType) {
+        return ticketRepository.findHostTicketListByUserId(userId, pageable, ticketRequestType);
+    }
+
+    @Override
+    public Optional<TicketInfoDto> findTicketInfo(Long ticketId, Long userId) {
+        return ticketRepository.findTicketInfoByTicketId(ticketId, userId);
+    }
+
     private String encodePassword(String password) {
         return passwordEncoder.encode(password);
     }
@@ -157,6 +230,48 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             key.append((rnd.nextInt(10)));
         }
         return key.toString();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isExistsEmail(String email) {
+        return userRepository.existsUserByEmail(email);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isValidNickname(String nickname) {
+        return !userRepository.existsUserByNickName(nickname);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean checkUserByNicknameAndTel(String nickname, String tel) {
+        return userRepository.existsUserByNickNameAndTel(nickname, tel);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isValidCertCode(String certCode, String key) {
+        return certCode.equals(redisService.getValues(key));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserFindEmailDto.Response findUserFindEmailDto(String nickname, String tel) {
+        UserFindEmailDto.Response response = userRepository.findEmailDtoByNickNameAndTel(nickname, tel)
+                .orElseThrow(() -> new IllegalStateException("잘못된 닉네임, 전화번호"));
+        String registerDateFormat = response.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"));
+        response.setCreatedDateStr(registerDateFormat);
+        return response;
+    }
+
+    @Override
+    public void sendCodeToEmail(String toEmail) throws ConnectException, MailSendException {
+        String title = "Spotick 이메일 인증 번호";
+        String certCode = createKey();
+        mailService.sendEmail(toEmail, title, certCode);
+        redisService.setValues(toEmail, certCode, Duration.ofMinutes(5));
     }
 }
 

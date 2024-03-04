@@ -1,13 +1,14 @@
 package com.app.spotick.service.place.inquiry;
 
 import com.app.spotick.api.dto.place.PlaceInquiryDto;
+import com.app.spotick.api.dto.place.InquiryResponseDto;
 import com.app.spotick.domain.dto.place.PlaceInquiryListDto;
+import com.app.spotick.domain.dto.place.inquiry.UnansweredInquiryDto;
 import com.app.spotick.domain.entity.place.PlaceInquiry;
-import com.app.spotick.domain.entity.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface PlaceInquiryService {
@@ -17,8 +18,10 @@ public interface PlaceInquiryService {
 
     Page<PlaceInquiryListDto> getInquiriesByUserId(Long userId, Pageable pageable);
 
-    Optional<PlaceInquiry> findInquiryByIdAndUser(Long placeInquiryId, Long userId);
+    void deleteInquiryById(Long placeInquiryId, Long userId);
 
-    void deleteInquiryById(Long placeInquiryId);
+    void updateInquiryResponse(InquiryResponseDto inquiryResponseDto);
+
+    Slice<UnansweredInquiryDto> findUnanswerdInquiriesSlice(Long placeId, Long userId, Pageable pageable);
 
 }

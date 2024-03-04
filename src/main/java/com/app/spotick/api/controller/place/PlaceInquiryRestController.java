@@ -1,22 +1,27 @@
 package com.app.spotick.api.controller.place;
 
+import com.app.spotick.api.dto.place.InquiryResponseDto;
 import com.app.spotick.api.dto.place.PlaceInquiryDto;
 import com.app.spotick.domain.dto.user.UserDetailsDto;
 import com.app.spotick.domain.pagination.Pagination;
+import com.app.spotick.domain.type.place.PlaceReservationStatus;
+import com.app.spotick.domain.type.post.PostStatus;
 import com.app.spotick.service.place.inquiry.PlaceInquiryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/places/inquiry")
@@ -26,6 +31,7 @@ public class PlaceInquiryRestController {
     @PostMapping("/v1/register")
     public ResponseEntity<PlaceInquiryDto.Response> inquiryRegister(@AuthenticationPrincipal UserDetailsDto userDetailsDto,
                                           @RequestBody PlaceInquiryDto.Request inquiryDto){
+
         PlaceInquiryDto.Response inquiryDtoResp = inquiryService.register(inquiryDto, userDetailsDto.getId());
         return ResponseEntity.ok()
                 .body(inquiryDtoResp);
@@ -46,10 +52,4 @@ public class PlaceInquiryRestController {
         return ResponseEntity.ok()
                 .body(Map.of("inquiryPage", inquiryPage,"pageBlock", pageBlock));
     }
-
-
-
-
-
-
 }
