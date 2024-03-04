@@ -1,8 +1,6 @@
 package com.app.spotick.repository.admin.place;
 
 import com.app.spotick.domain.dto.admin.place.AdminPlaceListDto;
-import com.app.spotick.domain.entity.place.Place;
-import com.app.spotick.domain.entity.user.QUser;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -20,17 +18,9 @@ public class AdminPlaceQDSLRepositoryImpl implements AdminPlaceQDSLRepository {
 
     private final JPAQueryFactory queryFactory;
 
-//  관리자 페이지 장소글 페이징 처리(무한 스크롤)
+//  관리자 페이지 장소글 전체 조회 및 페이징 처리(무한 스크롤)
     @Override
     public Slice<AdminPlaceListDto> placeListWithSlice(Pageable pageable) {
-//        List<Place> placeList = queryFactory.selectFrom(place)
-//                .leftJoin(place.user)
-//                .fetchJoin()
-//                .where(place.user.id.eq(userId))
-//                .orderBy(place.id.desc())
-//                .offset(pageable.getOffset())
-//                .limit(pageable.getPageSize() + 1)
-//                .fetch();
 
         List<AdminPlaceListDto> placeList = queryFactory.select(
                 Projections.constructor(AdminPlaceListDto.class,
@@ -38,12 +28,14 @@ public class AdminPlaceQDSLRepositoryImpl implements AdminPlaceQDSLRepository {
                         place.title,
                         user.id,
                         user.email,
+                        user.nickName,
                         place.createdDate,
                         place.placeStatus
                 )
         )
                 .from(place)
                 .join(place.user, user)
+                .where(place.user.email.eq(user.email))
                 .orderBy(place.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize() + 1)
@@ -58,5 +50,71 @@ public class AdminPlaceQDSLRepositoryImpl implements AdminPlaceQDSLRepository {
         }
 
         return new SliceImpl<>(placeList, pageable, hasNext);
+    }
+
+//  관리자 페이지 장소글 회원 이메일로 조회 및 페이징 처리(무한 스크롤)
+    @Override
+    public Slice<AdminPlaceListDto> placeListEmailWithSlice(String email, Pageable pageable) {
+        List<AdminPlaceListDto> placeEmailList = queryFactory.select(
+                Projections.constructor(
+                        AdminPlaceListDto.class,
+                        place.id,
+                        place.title,
+                        user.id,
+                        user.email,
+                        user.nickName,
+                        place.createdDate,
+                        place.placeStatus
+                )
+        )
+                .from(place)
+                .join(place.user, user)
+                .orderBy(place.id.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+
+        boolean hasNext = false;
+
+        if(placeEmailList.size() > pageable.getPageSize()){
+            placeEmailList.remove(pageable.getPageSize());
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(placeEmailList, pageable, hasNext);
+    }
+
+//  관리자 페이지 장소글 회원 닉네임으로 조회 및 페이징 처리(무한 스크롤)
+    @Override
+    public Slice<AdminPlaceListDto> placeListNickNameWithSlice(String nickName, Pageable pageable) {
+
+        List<AdminPlaceListDto> placeNickNameList = queryFactory.select(
+                Projections.constructor(
+                        AdminPlaceListDto.class,
+                        place.id,
+                        place.title,
+                        user.id,
+                        user.email,
+                        user.nickName,
+                        place.createdDate,
+                        place.placeStatus
+                )
+        )
+                .from(place)
+                .join(place.user, user)
+                .where(place.user.nickName.eq(user.nickName))
+                .orderBy(place.id.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+
+        boolean hasNext = false;
+
+        if(placeNickNameList.size() > pageable.getPageSize()){
+            placeNickNameList.remove(pageable.getPageSize());
+            hasNext = true;
+        }
+
+        return new SliceImpl<>(placeNickNameList, pageable, hasNext);
     }
 }

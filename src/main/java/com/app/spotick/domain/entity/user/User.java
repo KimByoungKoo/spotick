@@ -1,6 +1,7 @@
 package com.app.spotick.domain.entity.user;
 
 import com.app.spotick.domain.base.Period;
+import com.app.spotick.domain.type.user.AuthorityType;
 import com.app.spotick.domain.type.user.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,9 +30,12 @@ public class User extends Period {
     @OneToOne(fetch = FetchType.LAZY,cascade = CascadeType.PERSIST)
     @JoinColumn(name = "USER_PROFILE_FILE_ID")
     private UserProfileFile userProfileFile;
+//  2024-02-03 KBK 권한 Enm 추가
+    @Enumerated(EnumType.STRING)
+    private AuthorityType authorityType;
 
     @Builder
-    public User(Long id, String email, String password, String nickName, String tel, UserStatus userStatus, LocalDate suspensionEndDate, UserProfileFile userProfileFile) {
+    public User(Long id, String email, String password, String nickName, String tel, UserStatus userStatus, LocalDate suspensionEndDate, UserProfileFile userProfileFile, AuthorityType authorityType) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -40,6 +44,7 @@ public class User extends Period {
         this.userStatus = userStatus;
         this.suspensionEndDate = suspensionEndDate;
         this.userProfileFile = userProfileFile;
+        this.authorityType = authorityType;
     }
 
     public void updateNickName(String nickName) {
@@ -57,6 +62,7 @@ public class User extends Period {
     public void updateUserProfile(UserProfileFile userProfileFile){
         this.userProfileFile = userProfileFile;
     }
+
 }
 
 

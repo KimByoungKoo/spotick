@@ -17,14 +17,16 @@ public class AdminPlaceListDto {
     private String title;
     private Long userId;
     private String email;
+    private String nickName;
     private LocalDateTime createdDate;
     private PostStatus placeStatus;
 
-    public AdminPlaceListDto(Long placeId, String title, Long userId, String email, LocalDateTime createdDate, PostStatus placeStatus) {
+    public AdminPlaceListDto(Long placeId, String title, Long userId, String email, String nickName, LocalDateTime createdDate, PostStatus placeStatus) {
         this.placeId = placeId;
         this.title = title;
         this.userId = userId;
         this.email = email;
+        this.nickName = nickName;
         this.createdDate = createdDate;
         this.placeStatus = placeStatus;
     }
@@ -38,6 +40,7 @@ public class AdminPlaceListDto {
 //                .build();
 //    }
 
+//  장소글 작성일자 형식 바꾸기
     public String getCreatedDate(){
         return createdDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }

@@ -17,4 +17,5 @@ public enum PlaceReservationStatus {
     PlaceReservationStatus(String displayName) {
         this.displayName = displayName;
     }
+
 }

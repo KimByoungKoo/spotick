@@ -20,12 +20,19 @@ public class AdminPlaceServiceImpl implements AdminPlaceService{
     private final AdminPlaceRepository adminPlaceRepository;
     private final UserRepository userRepository;
 
+//  관리자 페이지 장소글 리스트 조회 및 페이징 처리(무한 스크롤)
     @Override
     @Transactional(readOnly = true)
-    public Slice<AdminPlaceListDto> placeListWithSlice( Pageable pageable){
+    public Slice<AdminPlaceListDto> placeListWithSlice(Pageable pageable){
         Slice<AdminPlaceListDto> userPlaceList = adminPlaceRepository.placeListWithSlice(pageable);
 
         return userPlaceList;
+    }
+
+//  관리자 페이지 장소글 이메일로 조회 및 페이징 처리(무한 스크롤)
+    @Override
+    public Slice<AdminPlaceListDto> placeListEmailSlice(String email, Pageable pageable) {
+        return null;
     }
 
     @Override

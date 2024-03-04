@@ -14,25 +14,25 @@ public class AdminController {
         return "admin/adminUser";
     }
 
-    @GetMapping("/board")
+    @GetMapping("/place")
     public String adminBoard(){
 
-        return "admin/adminBoard";
+        return "admin/adminPlace";
     }
 
-    @GetMapping("reply")
+    @GetMapping("/reply")
     public String adminReply(){
 
         return "admin/adminReply";
     }
 
-    @GetMapping("pay")
+    @GetMapping("/pay")
     public String adminPay(){
 
         return "admin/adminPayment";
     }
 
-    @GetMapping("approval")
+    @GetMapping("/approval")
     public String adminApproval(){
 
         return "admin/adminApproval";
